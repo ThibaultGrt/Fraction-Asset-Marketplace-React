@@ -10,7 +10,7 @@ import {
 import Account from "components/Account";
 import Chains from "components/Chains";
 import NFTBalance from "components/NFTBalance";
-import NFTMarketplace from "components/NFTMarketplace";
+import NFTMarketplace from "components/Marketplace/NFTMarketplace";
 import { Menu, Layout } from "antd";
 import SearchCollections from "components/SearchCollections";
 import "antd/dist/antd.css";
@@ -19,6 +19,7 @@ import "./style.css";
 import Text from "antd/lib/typography/Text";
 import FractionAssetForm from "components/FractionAssetForm/FractionAssetForm";
 import LogoImg from "./assets/logo_without_name.png";
+import MARKETPLACE_STATE from "./components/Marketplace/marketplace";
 const { Header, Footer } = Layout;
 
 const styles = {
@@ -51,10 +52,14 @@ const styles = {
     fontWeight: "600",
   },
 };
+
 const App = ({ isServerInfo }) => {
   const { isWeb3Enabled, enableWeb3, isAuthenticated, isWeb3EnableLoading } =
     useMoralis();
 
+  const [marketplaceState, setMarketplaceState] = useState(
+    MARKETPLACE_STATE.INITIAL
+  );
   const [inputValue, setInputValue] = useState("explore");
 
   useEffect(() => {
@@ -103,6 +108,7 @@ const App = ({ isServerInfo }) => {
             </Route>
             <Route path="/NFTMarketPlace">
               <NFTMarketplace
+                marketplaceState={marketplaceState}
                 inputValue={inputValue}
                 setInputValue={setInputValue}
               />
