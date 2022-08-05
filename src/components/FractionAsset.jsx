@@ -1,57 +1,95 @@
-import { Badge, Card, Image, Tooltip } from "antd";
-import React, { useState } from "react";
-import fractionAssetABI from "../contracts/FractionAsset.sol/FractionAsset.json";
-import { ethers } from "ethers";
+import { Alert, Badge, Card, Image, Input, Modal, Spin, Tooltip } from "antd";
+import React, { useState, useEffect } from "react";
+import fractionAssetContractJSON from "../contracts/FractionAsset.sol/FractionAsset.json";
+import { BigNumber, ethers } from "ethers";
 import { FileSearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import Meta from "antd/lib/card/Meta";
 import { getExplorer } from "helpers/networks";
 
-export default function FractionAsset({
-  provider,
-  signer,
-  chainId,
-  nft,
-  fetchMarketItems,
-}) {
+import LogoImg from "../assets/logo_without_name.png";
+
+export default function FractionAsset(props) {
   const contractAddr = "0x508aDCE0061B5F5FeBE092e993204cA0017B927A";
-  const fallbackImg =
-    "data:image/png;base64,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";
+  const fallbackImg = LogoImg;
 
-  const [nftToBuy, setNftToBuy] = useState(null);
+  const [provider, setProvider] = useState();
+  const [assetToBuy, setAssetToBuy] = useState(null);
   const [visibility, setVisibility] = useState(false);
+  const [signer, setSigner] = useState();
+  const [fractionAssetContract, setfractionAssetContract] = useState(null);
+  const chainId = "0x13881";
+  const [asset, setAsset] = useState(null);
+  const [accounts, setAccounts] = useState(null);
+  const fractionAssetABI = fractionAssetContractJSON.abi;
+  const [loading, setLoading] = useState(false);
+  const [fractionsToBuy, setFractionsToBuy] = useState("");
 
-  const fractionAssetContract = () => {
-    const fractionAsset = new ethers.Contract(
-      contractAddr,
-      fractionAssetABI,
-      provider
-    );
-    return fractionAsset;
-  };
+  useEffect(() => {
+    // get provider
+    (async () => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+      const accounts = await provider.send("eth_requestAccounts", []);
+      setProvider(provider);
+      setAccounts(accounts);
+      console.log("accounts");
+      console.log(accounts);
+      const signer = await provider.getSigner(0);
+      setSigner(signer);
+      console.log("signer");
+      console.log(signer);
+      const contract = new ethers.Contract(
+        contractAddr,
+        fractionAssetABI,
+        provider
+      );
+
+      console.log("contract");
+      console.log(contract);
+      // set the contract
+      setfractionAssetContract(contract);
+
+      const asset = {
+        name: await contract.name(),
+        image: fallbackImg,
+        shares: await contract.shares(),
+        price: await contract.sharePrice(),
+      };
+
+      setAsset(asset);
+    })();
+  }, []);
 
   const getSharesBalance = (addr) => {
-    return fractionAssetContract.getSharesBalance(addr);
+    return fractionAssetContract.balanceOf(addr);
   };
 
-  const buyShares = (amount) => {
-    fractionAssetContract.connect(signer).buyFractionShare(amount);
+  const buyShares = async (amount) => {
+    setAsset(asset);
+    setLoading(true);
+    console.log("ethers.utils.parseEther(amount * asset.price)");
+    console.log(amount);
+    console.log(asset.price);
+    console.log(String(amount * asset.price));
+    console.log(ethers.utils.parseEther(String(amount * asset.price)));
+
+    const succ = await fractionAssetContract
+      .connect(signer)
+      .buyFractions(amount, {
+        value: BigNumber.from(String(amount * asset.price)),
+        gasLimit: "100000",
+      });
+    setLoading(false);
+    setVisibility(false);
   };
 
-  const handleBuyClick = (nft) => {
-    setNftToBuy(nft);
-    console.log(nft.image);
+  const handleBuyClick = (asset) => {
+    setAssetToBuy(asset);
+
     setVisibility(true);
   };
-
-  const getMarketItem = (nft) => {
-    const result = fetchMarketItems?.find(
-      (e) =>
-        e.nftContract === nft?.token_address &&
-        e.tokenId === nft?.token_id &&
-        e.sold === false &&
-        e.confirmed === true
-    );
-    return result;
+  const handleInput = (event) => {
+    setFractionsToBuy(event.target.value);
   };
 
   return (
@@ -69,26 +107,81 @@ export default function FractionAsset({
               }
             />
           </Tooltip>,
-          <Tooltip title="Buy NFT">
-            <ShoppingCartOutlined onClick={() => handleBuyClick(nft)} />
+          <Tooltip title="Buy Asset Fractions">
+            <ShoppingCartOutlined onClick={() => handleBuyClick(asset)} />
           </Tooltip>,
         ]}
         style={{ width: 240, border: "2px solid #e7eaf3" }}
         cover={
           <Image
             preview={false}
-            src={nft.image || "error"}
+            src={asset?.image || "error"}
             fallback={fallbackImg}
             alt=""
             style={{ height: "240px" }}
           />
         }
       >
-        {getMarketItem(nft) && (
-          <Badge.Ribbon text="Buy Now" color="green"></Badge.Ribbon>
-        )}
-        <Meta title={nft.name} description={`#${nft.token_id}`} />
+        {asset && <Badge.Ribbon text="Buy Now" color="green"></Badge.Ribbon>}
+        <Meta
+          title={asset?.name}
+          description={`Total Number of shares: #${asset?.shares}`}
+        />
       </Card>
+      <div>
+        <Modal
+          title={`Buy ${assetToBuy?.name} #${assetToBuy?.shares}`}
+          visible={visibility}
+          onCancel={() => setVisibility(false)}
+          onOk={() => buyShares(fractionsToBuy)}
+          okText="Buy"
+        >
+          <Spin spinning={loading}>
+            <div
+              style={{
+                width: "250px",
+                margin: "auto",
+              }}
+            >
+              <Badge.Ribbon
+                color="green"
+                text={`${assetToBuy?.price / ("1e" + 18)} Matic`}
+              >
+                <img
+                  src={assetToBuy?.image}
+                  style={{
+                    width: "250px",
+                    borderRadius: "10px",
+                    marginBottom: "15px",
+                  }}
+                />
+                <Input
+                  onChange={handleInput}
+                  placeholder={`# of shares max ${fractionAssetContract?.shares()}`}
+                ></Input>
+              </Badge.Ribbon>
+            </div>
+          </Spin>
+        </Modal>
+
+        {/* <Modal
+            title={`Buy ${assetToBuy?.name} #${assetToBuy?.token_id}`}
+            visible={visibility}
+            onCancel={() => setVisibility(false)}
+            onOk={() => setVisibility(false)}
+          >
+            <img
+              src={assetToBuy?.image}
+              style={{
+                width: "250px",
+                margin: "auto",
+                borderRadius: "10px",
+                marginBottom: "15px",
+              }}
+            />
+            <Alert message="This NFT is currently not for sale" type="warning" />
+          </Modal> */}
+      </div>
     </div>
   );
 }
