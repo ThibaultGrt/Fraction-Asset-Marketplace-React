@@ -4,11 +4,12 @@ import App from "./App";
 import { MoralisProvider } from "react-moralis";
 import "./index.css";
 import { MoralisDappProvider } from "./providers/MoralisDappProvider/MoralisDappProvider";
+import "dotenv/config"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
 /** Get your free Moralis Account https://moralis.io/ */
 
-const APP_ID = "SQAq0R4Kg0hb0fKUpldeqqSkecKXnKIx5UQ65D1R";
-const SERVER_URL = "https://4y8ugmzt2b0m.usemoralis.com:2053/server";
+const APP_ID = process.env.REACT_APP_MORALIS_APPLICATION_ID;
+const SERVER_URL = process.env.REACT_APP_MORALIS_SERVER_URL;
 
 const Application = () => {
   const isServerInfo = APP_ID && SERVER_URL ? true : false;
