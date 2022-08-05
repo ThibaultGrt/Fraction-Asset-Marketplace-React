@@ -5,7 +5,9 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 require("hardhat/config");
+fs = require("fs");
 
+chainId = "0x13881";
 task(
         "deployParam",
         "deploy Fraction asset with parameters: name, shares, price are passed in cmd parameter"
@@ -36,5 +38,16 @@ task(
 
         res = await fractionAsset.deployed();
 
-        console.log(fractionAsset.address);
+        console.log(`Deployed to:  ${fractionAsset.address}`);
+
+        updateDeployedContracts(fractionAsset.address);
     });
+
+function updateDeployedContracts(newContractAddr) {
+    const entry = { addr: newContractAddr };
+    var file = "..//src/contracts/deployedContracts.json";
+    var m = JSON.parse(fs.readFileSync(file).toString());
+    m[chainId].push(entry);
+    console.log(m);
+    fs.writeFileSync(file, JSON.stringify(m));
+}

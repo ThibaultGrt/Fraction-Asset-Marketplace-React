@@ -1,4 +1,14 @@
-import { Alert, Badge, Card, Image, Input, Modal, Spin, Tooltip } from "antd";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Image,
+  Input,
+  Modal,
+  Spin,
+  Tooltip,
+} from "antd";
 import React, { useState, useEffect } from "react";
 import { BigNumber, ethers } from "ethers";
 import { FileSearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
@@ -26,23 +36,32 @@ export default function FractionAsset(props) {
     useFractionAsset();
   const [assetToBuy, setAssetToBuy] = useState(null);
   const [visibility, setVisibility] = useState(false);
+  const [errorTransaction, setErrorTransaction] = useState(false);
+  const [transactionReceipt, setTransactionReceipt] = useState();
 
   const [loading, setLoading] = useState(false);
   const [fractionsToBuy, setFractionsToBuy] = useState("");
-
-  const getSharesBalance = (addr) => {
-    return fractionAssetContract.balanceOf(addr);
-  };
 
   const buyShares = async (asset, amount) => {
     setLoading(true);
     console.log("contract");
     console.log(asset.contract);
-    const succ = await asset.contract.connect(signer).buyFractions(amount, {
-      value: BigNumber.from(String(Math.ceil(amount * asset.price))),
-      gasLimit: "100000",
-    })();
-    console.log(succ);
+
+    try {
+      const res = await (
+        await asset.contract.connect(signer).buyFractions(amount, {
+          value: BigNumber.from(String(Math.ceil(amount * asset.price))),
+          gasLimit: "100000",
+        })
+      ).wait();
+    } catch (e) {
+      setTransactionReceipt(e);
+      console.log(e);
+      setErrorTransaction(true);
+    }
+
+    console.log("Transaction Receipt");
+    console.log(transactionReceipt);
     setLoading(false);
     setVisibility(false);
   };
@@ -134,26 +153,17 @@ export default function FractionAsset(props) {
             </Spin>
           </Modal>
 
-          {/* <Modal
-            title={`Buy ${assetToBuy?.name} #${assetToBuy?.token_id}`}
-            visible={visibility}
-            onCancel={() => setVisibility(false)}
-            onOk={() => setVisibility(false)}
-          >
-            <img
-              src={assetToBuy?.image}
-              style={{
-                width: "250px",
-                margin: "auto",
-                borderRadius: "10px",
-                marginBottom: "15px",
-              }}
-            />
-            <Alert message="This NFT is currently not for sale" type="warning" />
-          </Modal> */}
+          <Modal
+            title={`Error with Transaction`}
+            visible={errorTransaction}
+            footer={[
+              <Button key="ok" onClick={() => setErrorTransaction(false)}>
+                ok
+              </Button>,
+            ]}
+          ></Modal>
         </div>
       ))}
-      ;
     </div>
   );
 }
