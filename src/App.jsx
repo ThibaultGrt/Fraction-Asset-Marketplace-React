@@ -10,7 +10,6 @@ import {
 import Account from "components/Account";
 import Chains from "components/Chains";
 import NFTBalance from "components/NFTBalance";
-import NFTMarketplace from "components/Marketplace/NFTMarketplace";
 import { Menu, Layout } from "antd";
 import SearchCollections from "components/SearchCollections";
 import "antd/dist/antd.css";
