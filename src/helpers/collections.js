@@ -1,11 +1,11 @@
 export const networkCollections = {
     "0x13881": [
         //Add Your Collections here
-        {
-            image: "https://lh3.googleusercontent.com/BWCni9INm--eqCK800BbRkL10zGyflxfPwTHt4XphMSWG3XZvPx1JyGdfU9vSor8K046DJg-Q8Y4ioUlWHiCZqgR_L00w4vcbA-w=s0",
-            name: "Fraction Asset",
-            addrs: "0x508aDCE0061B5F5FeBE092e993204cA0017B927A",
-        },
+        // {
+        //     image: "https://lh3.googleusercontent.com/BWCni9INm--eqCK800BbRkL10zGyflxfPwTHt4XphMSWG3XZvPx1JyGdfU9vSor8K046DJg-Q8Y4ioUlWHiCZqgR_L00w4vcbA-w=s0",
+        //     name: "Fraction Asset",
+        //     addrs: "0x508aDCE0061B5F5FeBE092e993204cA0017B927A",
+        // },
         {
             image: "https://lh3.googleusercontent.com/BWCni9INm--eqCK800BbRkL10zGyflxfPwTHt4XphMSWG3XZvPx1JyGdfU9vSor8K046DJg-Q8Y4ioUlWHiCZqgR_L00w4vcbA-w=s0",
             name: "Test Mages",

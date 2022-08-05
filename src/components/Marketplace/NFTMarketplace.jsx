@@ -17,8 +17,9 @@ import { useWeb3ExecuteFunction } from "react-moralis";
 import CollectionCard from "../CollectionCard";
 
 import { BrowserRouter as Router, Route, NavLink } from "react-router-dom";
-import FractionAssetCard from "../FractionAssetCard";
+import NFTCard from "../NFTCard";
 import MARKETPLACE_STATE from "./marketplace";
+import CollectionBanner from "components/CollectionBanner";
 const { Meta } = Card;
 
 const styles = {
@@ -58,9 +59,13 @@ const styles = {
   },
 };
 
-function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
-  const { NFTMarketplaceCollection, totalNFTs, fetchSuccess } =
-    useNFTTokenIds(inputValue); // use Moralis to the details from moralis API.
+function NFTMarketplace({
+  marketplaceState,
+  setMarketplaceState,
+  inputValue,
+  setInputValue,
+}) {
+  const { NFTTokenIds, totalNFTs, fetchSuccess } = useNFTTokenIds(inputValue); // use Moralis to the details from moralis API.
 
   const contractProcessor = useWeb3ExecuteFunction();
   const { chainId, marketAddress, contractABI, walletAddress } =
@@ -84,21 +89,6 @@ function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
   const NFTCollections = getCollectionsByChain(chainId);
   const contractABIJson = JSON.parse(contractABI);
 
-  /**
-   * Get nft with specific token id.
-   * @param {*} nftToBuy
-   * @returns
-   */
-  const getMarketItem = (nftToBuy) => {
-    const result = fetchMarketItems?.find(
-      (e) =>
-        e.nftContract === nftToBuy?.token_address &&
-        e.tokenId === nftToBuy?.token_id &&
-        e.sold === false &&
-        e.confirmed === true
-    );
-    return result;
-  };
   const isContractSetErrorMessage = (isContractSet) => {
     if (!isContractSet) {
       return (
@@ -132,18 +122,25 @@ function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
   };
 
   const getInitial = (shouldRender) => {
+    console.log("GET Initial - NFTTokenIds");
+    console.log(NFTTokenIds);
     if (shouldRender) {
       return (
         <div>
           {NFTCollections?.map((nft, index) => (
             <div key={index}>
               <NavLink
-                to={`${nft.address}`}
-                onClick={setMarketDisplay.bind(MARKETPLACE_STATE.NFT_TOKENS)}
+                to={`${nft.addrs}`}
+                onClick={() => {
+                  console.log(
+                    "SETTING STATE TO: " + MARKETPLACE_STATE.NFT_TOKENS
+                  );
+                  setMarketplaceState(MARKETPLACE_STATE.NFT_TOKENS);
+                  getNfts(true);
+                }}
               >
                 <CollectionCard
-                  totalNFTs={totalNFTs}
-                  NFTMarketplaceCollection={NFTCollections}
+                  key={nft.addrs}
                   nft={nft}
                   index={index}
                   setInputValue={setInputValue}
@@ -162,18 +159,20 @@ function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
         <div>
           {NFTCollections?.map((nft, index) => (
             <div key={index}>
-              <NavLink
-                to={`${nft.address}`}
-                onClick={setMarketDisplay.bind(MARKETPLACE_STATE.NFT_TOKENS)}
-              >
-                <CollectionCard
-                  totalNFTs={totalNFTs}
-                  NFTMarketplaceCollection={NFTMarketplaceCollection}
-                  nft={nft}
-                  index={index}
-                  setInputValue={setInputValue}
-                />
-              </NavLink>
+              <CollectionCard
+                totalNFTs={totalNFTs}
+                NFTTokenIds={NFTTokenIds}
+                nft={nft}
+                index={index}
+                setInputValue={setInputValue}
+                onClick={() => {
+                  console.log(
+                    "SETTING STATE TO: " + MARKETPLACE_STATE.NFT_TOKENS
+                  );
+                  setMarketplaceState(MARKETPLACE_STATE.NFT_TOKENS);
+                  getNfts(true);
+                }}
+              />
             </div>
           ))}
         </div>
@@ -182,24 +181,32 @@ function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
   };
 
   const getNfts = (shouldRender) => {
-    console.log("shouldRender");
+    console.log("get NFTS - shouldRender");
     console.log(shouldRender);
     console.log("marketplaceState");
     console.log(marketplaceState);
+    console.log("GET NFTS - NFTTokenIds");
+    console.log(NFTTokenIds);
+
+    console.log("GET NFTS - INPUT VALUE");
+    console.log(inputValue);
     if (shouldRender) {
       return (
         <div>
-          {NFTMarketplaceCollection.slice(0, 20).map((nft, index) => (
-            <Route path={`${nft.address}`}>
-              <div key={index}>
-                <FractionAssetCard
-                  chainId={chainId}
-                  fetchMarketItems={fetchMarketItems}
-                  contractProcessor={contractProcessor}
-                  nft={nft}
-                />
-              </div>{" "}
-            </Route>
+          <CollectionBanner
+            NFTCollections={NFTCollections}
+            totalNFTs={totalNFTs}
+          ></CollectionBanner>
+          {NFTTokenIds.slice(0, 20).map((nft, index) => (
+            <div key={index}>
+              <NFTCard
+                key={nft.addrs}
+                chainId={chainId}
+                fetchMarketItems={fetchMarketItems}
+                contractProcessor={contractProcessor}
+                nft={nft}
+              />
+            </div>
           ))}
         </div>
       );
@@ -223,15 +230,13 @@ function NFTMarketplace({ marketplaceState, inputValue, setInputValue }) {
           </>
         }
 
-        <div style={styles.NFTs}>
+        <div>
           {/* Display the marketplace with all known collections */}
 
           <div>
-            <Router>
-              {getInitial(marketplaceState === MARKETPLACE_STATE.INITIAL)}
-              {getCollection(marketplaceState === MARKETPLACE_STATE.COLLECTION)}
-              {getNfts(marketplaceState === MARKETPLACE_STATE.NFT_TOKENS)}
-            </Router>
+            {getInitial(marketplaceState === MARKETPLACE_STATE.INITIAL)}
+            {getCollection(marketplaceState === MARKETPLACE_STATE.COLLECTION)}
+            {getNfts(marketplaceState === MARKETPLACE_STATE.NFT_TOKENS)}
           </div>
         </div>
       </div>

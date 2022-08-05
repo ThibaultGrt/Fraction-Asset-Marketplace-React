@@ -20,6 +20,7 @@ import Text from "antd/lib/typography/Text";
 import FractionAssetForm from "components/FractionAssetForm/FractionAssetForm";
 import LogoImg from "./assets/logo_without_name.png";
 import MARKETPLACE_STATE from "./components/Marketplace/marketplace";
+import FractionAsset from "components/FractionAsset";
 const { Header, Footer } = Layout;
 
 const styles = {
@@ -50,6 +51,10 @@ const styles = {
     alignItems: "center",
     fontSize: "15px",
     fontWeight: "600",
+  },
+  logo: {
+    width: "80px",
+    "max-width": "80px",
   },
 };
 
@@ -88,6 +93,9 @@ const App = ({ isServerInfo }) => {
             <Menu.Item key="nftMarket" onClick={() => setInputValue("explore")}>
               <NavLink to="/NFTMarketPlace">🛒 Explore Market</NavLink>
             </Menu.Item>
+            <Menu.Item key="fa">
+              <NavLink to="/faDisplay">🔥 Fraction Asset</NavLink>
+            </Menu.Item>
             <Menu.Item key="form">
               <NavLink to="/creationForm">🔥 Create a Fraction Asset</NavLink>
             </Menu.Item>
@@ -106,9 +114,13 @@ const App = ({ isServerInfo }) => {
             <Route path="/nftBalance">
               <NFTBalance />
             </Route>
+            <Route path="/faDisplay">
+              <FractionAsset />
+            </Route>
             <Route path="/NFTMarketPlace">
               <NFTMarketplace
                 marketplaceState={marketplaceState}
+                setMarketplaceState={setMarketplaceState}
                 inputValue={inputValue}
                 setInputValue={setInputValue}
               />
@@ -130,7 +142,7 @@ const App = ({ isServerInfo }) => {
 
 export const Logo = () => (
   <div style={{ display: "flex" }}>
-    <img className="app__logo" src={LogoImg} />
+    <img style={styles.logo} src={LogoImg} />
   </div>
 );
 
