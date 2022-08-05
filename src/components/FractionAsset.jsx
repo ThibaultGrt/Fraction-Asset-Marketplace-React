@@ -22,7 +22,7 @@ const styles = {
 
 export default function FractionAsset(props) {
   const fallbackImg = LogoImg;
-  const { chainId, accounts, fractionAssetContract, assets } =
+  const { chainId, signer, accounts, fractionAssetContract, assets } =
     useFractionAsset();
   const [assetToBuy, setAssetToBuy] = useState(null);
   const [visibility, setVisibility] = useState(false);
@@ -36,13 +36,13 @@ export default function FractionAsset(props) {
 
   const buyShares = async (asset, amount) => {
     setLoading(true);
-
-    const succ = await fractionAssetContract
-      .connect(accounts[0])
-      .buyFractions(amount, {
-        value: BigNumber.from(String(amount * asset.price)),
-        gasLimit: "100000",
-      });
+    console.log("contract");
+    console.log(asset.contract);
+    const succ = await asset.contract.connect(signer).buyFractions(amount, {
+      value: BigNumber.from(String(Math.ceil(amount * asset.price))),
+      gasLimit: "100000",
+    })();
+    console.log(succ);
     setLoading(false);
     setVisibility(false);
   };
@@ -93,9 +93,9 @@ export default function FractionAsset(props) {
             )}
             <Meta
               title={asset?.name}
-              description={`Available shares: ${
-                asset?.shares - asset?.availableShares
-              } / ${asset?.shares}. Share price:${asset?.price} Matic`}
+              description={`Available shares: ${asset?.availableShares} / ${
+                asset?.shares
+              }. Share price: ${asset?.price.toFixed(2)} Matic`}
             />
           </Card>
 
@@ -115,7 +115,7 @@ export default function FractionAsset(props) {
               >
                 <Badge.Ribbon
                   color="green"
-                  text={`${assetToBuy?.price / ("1e" + 18)} Matic`}
+                  text={`${assetToBuy?.price.toFixed(2)} Matic`}
                 >
                   <img
                     src={assetToBuy?.image}
@@ -127,7 +127,7 @@ export default function FractionAsset(props) {
                   />
                   <Input
                     onChange={handleInput}
-                    placeholder={`# of shares max' ${fractionAssetContract?.shares()}`}
+                    placeholder={`# of shares max: ' ${assetToBuy?.availableShares}`}
                   ></Input>
                 </Badge.Ribbon>
               </div>

@@ -13,58 +13,60 @@ export const useFractionAsset = () => {
 
     const [provider, setProvider] = useState();
     const [signer, setSigner] = useState();
+    const [accounts, setAccounts] = useState();
 
     const deployedContracts = deployedContractsJSON[chainId];
     const fractionAssetABI = fractionAssetContractJSON.abi;
-    const [fractionAssetContracts, setfractionAssetContracts] = useState([]);
 
     const [assets, setAssets] = useState([]);
-    const [accounts, setAccounts] = useState([]);
 
     useEffect(() => {
-        let allContracts = [];
         let allAssets = [];
         let prov = "";
         let accs = "";
 
         (async() => {
-            const allContracts = [];
             const allAssets = [];
             const prov = new ethers.providers.Web3Provider(window.ethereum);
+            const accounts = await prov.send("eth_requestAccounts", []);
 
-            const accs = await prov.send("eth_requestAccounts", []);
+            const sign = await prov.getSigner();
 
-            setAccounts(accs);
             for (const contractMetadata of deployedContracts) {
                 const contract = new ethers.Contract(
                     contractMetadata.addr,
                     fractionAssetABI,
                     prov
                 );
-                allContracts.push(contract);
 
+                const nameVal = await contract.name();
+                const sharesVal = await contract.shares();
+                const availableSharesVal =
+                    sharesVal - (await contract.totalOwnedShares());
+                const priceVal = (await contract.sharePrice()) / 10 ** 18;
+                const ownedSharesVal = await contract.balanceOf(accounts[0]);
                 const asset = {
-                    name: await contract.name(),
+                    name: nameVal,
                     addr: contractMetadata.addr,
                     image: fallbackImg,
-                    shares: await contract.shares(),
-                    availableShares: await contract.totalOwnedShares(),
-                    price: (await contract.sharePrice()) / 10 ** 18,
-                    ownedShares: await contract.balanceOf(accs[0]),
+                    shares: sharesVal,
+                    availableShares: availableSharesVal,
+                    price: priceVal,
+                    ownedShares: ownedSharesVal,
+                    contract: contract,
                 };
                 allAssets.push(asset);
             }
-
-            setfractionAssetContracts(allContracts);
+            setAccounts(accs);
+            setSigner(sign);
             setAssets(allAssets);
         })();
     }, []);
 
     return {
         chainId,
-        provider,
-        accounts,
-        fractionAssetContracts,
+        signer,
         assets,
+        accounts,
     };
 };
