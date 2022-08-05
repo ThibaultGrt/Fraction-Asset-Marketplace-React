@@ -8,6 +8,7 @@ import { getExplorer } from "helpers/networks";
 import fractionAssetContractJSON from "../contracts/FractionAsset.sol/FractionAsset.json";
 import LogoImg from "../assets/logo_without_name.png";
 import { BigNumber, ethers } from "ethers";
+import { useFractionAsset } from "hooks/useFractionAsset";
 
 const { Meta } = Card;
 
@@ -24,39 +25,21 @@ const styles = {
 };
 
 function FractionAssetBalance() {
-  const contractAddr = "0x508aDCE0061B5F5FeBE092e993204cA0017B927A";
-  const fractionAssetABI = fractionAssetContractJSON.abi;
-  const [sharesBalance, setSharesBalance] = useState("");
-  const [name, setName] = useState("");
-  const chainId = "0x13881";
-
-  useEffect(() => {
-    (async () => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const accounts = await provider.send("eth_requestAccounts", []);
-      const contract = new ethers.Contract(
-        contractAddr,
-        fractionAssetABI,
-        provider
-      );
-
-      setSharesBalance(await contract.balanceOf(accounts[0]));
-      setName(await contract.name());
-    })();
-  }, []);
+  const { chainId, assets } = useFractionAsset();
 
   return (
     <>
       <div style={styles.NFTs}>
-        {sharesBalance && (
+        {assets?.map((asset, index) => (
           <Card
+            key={index}
             hoverable
             actions={[
               <Tooltip title="View On Blockexplorer">
                 <FileSearchOutlined
                   onClick={() =>
                     window.open(
-                      `${getExplorer(chainId)}address/${contractAddr}`,
+                      `${getExplorer(chainId)}address/${asset.addr}`,
                       "_blank"
                     )
                   }
@@ -75,11 +58,11 @@ function FractionAssetBalance() {
             }
           >
             <Meta
-              title={name}
-              description={`Owns: ${sharesBalance} Fractions `}
+              title={asset.name}
+              description={`Fractions Owned: ${asset?.ownedShares}  / ${asset?.shares}. Fraction price: ${asset?.price} Matic. `}
             />
           </Card>
-        )}
+        ))}
       </div>
     </>
   );
