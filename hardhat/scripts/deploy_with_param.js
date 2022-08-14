@@ -45,7 +45,7 @@ task(
 
 function updateDeployedContracts(newContractAddr) {
     const entry = { addr: newContractAddr };
-    var file = "..//src/contracts/deployedContracts.json";
+    var file = "../src/contracts/deployedContracts.json";
     var m = JSON.parse(fs.readFileSync(file).toString());
     m[chainId].push(entry);
     console.log(m);

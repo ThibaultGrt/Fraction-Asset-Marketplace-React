@@ -41,7 +41,7 @@ export default function FractionAsset(props) {
 
   const [loading, setLoading] = useState(false);
   const [fractionsToBuy, setFractionsToBuy] = useState("");
-
+  const DECIMALS = 10 ** 18;
   const buyShares = async (asset, amount) => {
     setLoading(true);
     console.log("contract");
@@ -50,7 +50,9 @@ export default function FractionAsset(props) {
     try {
       const res = await (
         await asset.contract.connect(signer).buyFractions(amount, {
-          value: BigNumber.from(String(Math.ceil(amount * asset.price))),
+          value: BigNumber.from(
+            String(Math.ceil(amount * asset?.price) * DECIMALS)
+          ),
           gasLimit: "100000",
         })
       ).wait();
@@ -121,8 +123,11 @@ export default function FractionAsset(props) {
           <Modal
             title={`Buy ${assetToBuy?.name} #${assetToBuy?.shares}`}
             visible={visibility}
-            onCancel={() => setVisibility(false)}
-            onOk={() => buyShares(asset, fractionsToBuy)}
+            onCancel={() => {
+              setVisibility(false);
+              setLoading(false);
+            }}
+            onOk={() => buyShares(assetToBuy, fractionsToBuy)}
             okText="Buy"
           >
             <Spin spinning={loading}>
