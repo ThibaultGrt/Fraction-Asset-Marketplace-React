@@ -8,7 +8,7 @@ Please consider installing the following dependencies to be able to run the proj
 
 #💿 Clone the Repo and Install all dependencies:
 
-####Web application installation
+#### Web application installation
 
 Clone the repository with your Gitlab account:
 
@@ -23,7 +23,7 @@ $ cd ./Jean-Loic-Mugnier/
 $ yarn install
 ```
 
-####Web application configuration
+#### Web application configuration
 
 ✏ Create .env in the main folder and provide your appId and serverUrl from Moralis
 Example:
